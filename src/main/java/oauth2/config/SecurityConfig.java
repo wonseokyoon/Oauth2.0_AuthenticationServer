@@ -1,9 +1,5 @@
 package oauth2.config;
 
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -12,11 +8,16 @@ import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -38,22 +39,19 @@ public class SecurityConfig {
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authorizationServer(HttpSecurity http) throws Exception {
-        OAuth2AuthorizationServerConfigurer oauth2Config = new OAuth2AuthorizationServerConfigurer();
 
-        // 여기에서 OAuth2 권한 서버의 설정을 추가합니다.
-        oauth2Config.authorizationEndpoint(withDefaults());
-        oauth2Config.tokenEndpoint(withDefaults());
-        oauth2Config.oidc(withDefaults()); // OIDC 지원 (선택 사항)
+        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
 
-        // HttpSecurity에 OAuth2AuthorizationServerConfigurer 적용
-        oauth2Config.configure(http);
-
-        http.exceptionHandling(exceptions ->
-                exceptions.defaultAuthenticationEntryPointFor(
-                        new LoginUrlAuthenticationEntryPoint("/login"),
-                        new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
-                )
-        );
+        http
+                .getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                .oidc(withDefaults());
+        http
+                .exceptionHandling((exceptions) -> exceptions
+                        .defaultAuthenticationEntryPointFor(
+                                new LoginUrlAuthenticationEntryPoint("/login"),
+                                new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
+                        )
+                );
 
         return http.build();
     }
@@ -90,7 +88,7 @@ public class SecurityConfig {
                 .build();
     }
 
-    // 비대칭 키 발급부
+    // jwt 토큰 발급부
     @Bean
     public JWKSource<SecurityContext> jwkSource() {
         KeyPair keyPair = generateRsaKey();
@@ -113,7 +111,6 @@ public class SecurityConfig {
         }
         return keyPair;
     }
-
 
 
 }

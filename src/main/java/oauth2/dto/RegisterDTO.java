@@ -7,6 +7,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class RegisterDTO {
     private String clientName;
+    private String clientSecret;
     private String redirectUris;
     private String postLogoutRedirectUris;
     private String scopes;
