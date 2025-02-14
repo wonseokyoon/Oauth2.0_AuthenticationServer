@@ -1,6 +1,7 @@
 package oauth2.controller;
 
 import lombok.RequiredArgsConstructor;
+import oauth2.domain.UserEntity;
 import oauth2.dto.UserDTO;
 import oauth2.dto.UserResponse;
 import oauth2.service.UserService;
@@ -28,14 +29,16 @@ public class UserController {
 
     @PostMapping("/join")
     public ResponseEntity<UserResponse> join(@ModelAttribute UserDTO dto){
-        UserResponse response=userService.join(dto);
+        UserEntity user =userService.join(dto);
+        UserResponse response = new UserResponse(user.getUsername(),user.getRole().name(),user.getNiceName(),user.getEmail());
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("join2")
     @ResponseBody
     public ResponseEntity<UserResponse> join2(UserDTO dto){
-        UserResponse response=userService.join(dto);
+        UserEntity user=userService.join(dto);
+        UserResponse response = new UserResponse(user.getUsername(),user.getRole().name(),user.getNiceName(),user.getEmail());
         return ResponseEntity.ok(response);
     }
 }

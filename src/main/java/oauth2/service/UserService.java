@@ -17,7 +17,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public UserResponse join(UserDTO dto) {
+    public UserEntity join(UserDTO dto) {
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(dto.getUsername());
         userEntity.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
@@ -26,14 +26,7 @@ public class UserService {
         userEntity.setRole(Role.ADMIN);
 
         userRepository.save(userEntity);
-
-        UserResponse response = new UserResponse();
-        response.setUsername(userEntity.getUsername());
-        response.setNickname(userEntity.getNiceName());
-        response.setEmail(userEntity.getEmail());
-        response.setRole(userEntity.getRole().name());
-
-        return response;
+        return userEntity;
     }
 
 
